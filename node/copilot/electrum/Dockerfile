@@ -10,7 +10,7 @@ USER root
 WORKDIR /root
 
 # electrumx
-RUN git clone https://github.com/spesmilo/electrumx.git
+RUN git clone https://github.com/garlicoin-project/electrumx.git
 RUN cd electrumx && pip3 install .
 
 COPY start.sh /root/

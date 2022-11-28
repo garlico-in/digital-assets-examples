@@ -3,14 +3,14 @@
 echo "start ssh"
 /root/docker-ssh.sh &
 
-# bitcoind rpcauth
-python3 /root/rpcauth.py bitcoinrpc > rpc.txt
-cat rpc.txt | grep rpcauth >> /root/bitcoin.conf 
+# garlicoind rpcauth
+python3 /root/rpcauth.py garlicoinrpc > rpc.txt
+cat rpc.txt | grep rpcauth >> /root/garlicoin.conf 
 
-export COIN=Bitcoin
-export DB_DIRECTORY=/root/bitcoin_data/electrumx
+export COIN=Garlicoin
+export DB_DIRECTORY=/root/garlicoin_data/electrumx
 export RPCPASSWORD=`cat rpc.txt | tail -n 1`
-export DAEMON_URL=http://bitcoinrpc:$RPCPASSWORD@localhost/
+export DAEMON_URL=http://garlicoinrpc:$RPCPASSWORD@localhost/
 export ALLOW_ROOT=true
 export SERVICES=ssl://:50002,rpc://
 export SSL_CERTFILE=/root/server.crt
@@ -25,10 +25,10 @@ mkdir /log
 ln -sf /proc/$$/fd/1 /log/stdout.log
 ln -sf /proc/$$/fd/2 /log/stderr.log
 
-mkdir /root/bitcoin_data/bitcoind
-mkdir /root/bitcoin_data/electrumx
+mkdir /root/garlicoin_data/garlicoind
+mkdir /root/garlicoin_data/electrumx
 
-rm /root/bitcoin_data/debug.log
+rm /root/garlicoin_data/debug.log
 
 ## Pre execution handler
 pre_execution_handler() {
@@ -71,8 +71,8 @@ pre_execution_handler
 pids=""
 RESULT=0
 
-echo "start bitcoind"
->/log/stdout.log 2>/log/stderr.log /root/bitcoin/bin/bitcoind -conf=/root/bitcoin.conf -datadir=/root/bitcoin_data/bitcoind &
+echo "start garlicoind"
+>/log/stdout.log 2>/log/stderr.log /root/garlicoin/bin/garlicoind -conf=/root/garlicoin.conf -datadir=/root/garlicoin_data/garlicoind &
 pids="$pids $!"
 echo "start electrumx"
 >/log/stdout.log 2>/log/stderr.log /root/electrumx/electrumx_server &

@@ -3,7 +3,7 @@ Description: Deploy a service on AWS Fargate, hosted in a private subnet, but ac
 Parameters:
   StackName:
     Type: String
-    Default: Bitcoin
+    Default: Garlicoin
     Description: The name of the parent Fargate networking stack that you created. Necessary
                  to locate and reference resources created by that stack.
   ServiceName:
@@ -23,9 +23,13 @@ Parameters:
   ServerKey:
     Type: String
     Description: ServerKey
-  ContainerPort:
+  ServerPort:
     Type: Number
     Default: 50002
+    Description: What port number the application inside the docker container is binding to
+  NodePort:
+    Type: Number
+    Default: 42069
     Description: What port number the application inside the docker container is binding to
   ContainerCpu:
     Type: Number
@@ -33,7 +37,7 @@ Parameters:
     Description: How much CPU to give the container. 1024 is 1 CPU
   ContainerMemory:
     Type: Number
-    Default: 16384
+    Default: 4096
     Description: How much memory in megabytes to give the container
   DesiredCount:
     Type: Number
@@ -63,7 +67,7 @@ Resources:
           !Join ['-', [!Ref 'StackName', 'ECSTaskExecutionRole']]
       TaskRoleArn:
         Fn::ImportValue:
-          !Join ['-', [!Ref 'StackName', 'BitcoinExecutionRole-ARN']]
+          !Join ['-', [!Ref 'StackName', 'GarlicoinExecutionRole-ARN']]
       Volumes:
         - Name: efsdata
           EFSVolumeConfiguration:
@@ -76,10 +80,12 @@ Resources:
           Memory: !Ref 'ContainerMemory'
           Image: !Ref 'ImageUrl'
           PortMappings:
-            - ContainerPort: !Ref 'ContainerPort'
+            - ContainerPort: !Ref 'ServerPort'
             - ContainerPort: 50002
+            - ContainerPort: !Ref 'NodePort'
+            - ContainerPort: 42069
           MountPoints:
-            - ContainerPath: /root/bitcoin_data
+            - ContainerPath: /root/garlicoin_data
               SourceVolume: efsdata
           Ulimits:
             - HardLimit: 65536
@@ -97,9 +103,9 @@ Resources:
           LogConfiguration:
             LogDriver: 'awslogs'
             Options:
-              awslogs-group: bitcoin
+              awslogs-group: garlicoin
               awslogs-region: !Ref 'AWS::Region'
-              awslogs-stream-prefix: bitcoin_node
+              awslogs-stream-prefix: garlicoin_node
 
   # The service. The service is a resource which allows you to run multiple
   # copies of a type of task, and gather up their logs and metrics, as well

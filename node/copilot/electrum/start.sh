@@ -1,8 +1,8 @@
 #!/bin/sh
 
-export COIN=Bitcoin
+export COIN=Garlicoin
 export DB_DIRECTORY=/root/electrum_data/electrumx
-export DAEMON_URL=http://$RPC_USER:$RPC_PASSWORD@bitcoin-core.$COPILOT_ENVIRONMENT_NAME.bitcoin.local:8332/
+export DAEMON_URL=http://$RPC_USER:$RPC_PASSWORD@garlicoin-core.$COPILOT_ENVIRONMENT_NAME.garlicoin.local:42068/
 echo "DAEMON_URL=$DAEMON_URL"
 export ALLOW_ROOT=true
 export SERVICES=ssl://:50002,rpc://

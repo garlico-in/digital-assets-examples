@@ -1,13 +1,13 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  bitcoin-node
+  garlicoin-node
 
 Parameters:
   EnvironmentName:
     Description: An environment name that will be prefixed to resource names
     Type: String
-    Default: bitcoin
+    Default: garlicoin
 
   VpcCIDR:
     Description: Please enter the IP range (CIDR notation) for this VPC
@@ -195,7 +195,7 @@ Resources:
       RouteTableId: !Ref PrivateRouteTable2
       SubnetId: !Ref PrivateSubnet2
 
-  BitcoinECR:
+  GarlicoinECR:
     Type: AWS::ECR::Repository
     Properties: 
       RepositoryName: !Sub ${EnvironmentName}_ecr
@@ -213,6 +213,10 @@ Resources:
         - IpProtocol: tcp
           FromPort: 50002
           ToPort: 50002
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 42069
+          ToPort: 42069
           CidrIp: 0.0.0.0/0
       Tags:
         - Key: Name
@@ -234,7 +238,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
 
-  BitcoinExecutionRole:
+  GarlicoinExecutionRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -271,11 +275,11 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       TargetType: ip
-      Port: 22
+      Port: 50002
       Protocol: TCP
       HealthCheckEnabled: true
       HealthCheckIntervalSeconds: 10
-      HealthCheckPort: 22
+      HealthCheckPort: 50002
       HealthCheckProtocol: TCP
       HealthCheckTimeoutSeconds: 10
       HealthyThresholdCount: 3
@@ -291,13 +295,67 @@ Resources:
       - Type: forward
         TargetGroupArn: !Ref TargetGroupElectrum
       LoadBalancerArn: !Ref NetworkLoadBalancer
+      Port: 50002
+      Protocol: TCP   
+      
+  TargetGroupSSH:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      TargetType: ip
       Port: 22
-      Protocol: TCP        
+      Protocol: TCP
+      HealthCheckEnabled: true
+      HealthCheckIntervalSeconds: 10
+      HealthCheckPort: 22
+      HealthCheckProtocol: TCP
+      HealthCheckTimeoutSeconds: 10
+      HealthyThresholdCount: 3
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: 60
+      VpcId: !Ref 'VPC'
+      
+  NetworkLoadBalancerListenerSSH:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn: !Ref TargetGroupElectrum
+      LoadBalancerArn: !Ref NetworkLoadBalancer
+      Port: 22
+      Protocol: TCP 
+      
+  TargetGroupGarlicoin:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      TargetType: ip
+      Port: 42069
+      Protocol: TCP
+      HealthCheckEnabled: true
+      HealthCheckIntervalSeconds: 10
+      HealthCheckPort: 42069
+      HealthCheckProtocol: TCP
+      HealthCheckTimeoutSeconds: 10
+      HealthyThresholdCount: 3
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: 60
+      VpcId: !Ref 'VPC'
+      
+  NetworkLoadBalancerListenerGarlicoin:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn: !Ref TargetGroupElectrum
+      LoadBalancerArn: !Ref NetworkLoadBalancer
+      Port: 42069
+      Protocol: TCP 
         
   LogGroup:
     Type: AWS::Logs::LogGroup
     Properties: 
-      LogGroupName: bitcoin
+      LogGroupName: garlicoin
       RetentionInDays: 7
 
   MountTargetSecurityGroup:
@@ -322,7 +380,7 @@ Resources:
         - TransitionToPrimaryStorageClass: AFTER_1_ACCESS
       FileSystemTags:
       - Key: Name
-        Value: bitcoin-data
+        Value: garlicoin-data
   
   MountTarget1:
     Type: AWS::EFS::MountTarget
@@ -349,82 +407,82 @@ Outputs:
     Description: A reference to the created VPC
     Value: !Ref VPC
     Export:
-      Name: Bitcoin-VPC
+      Name: Garlicoin-VPC
 
   PrivateSubnets:
     Description: A list of the private subnets
     Value: !Join [",", [!Ref PrivateSubnet1, !Ref PrivateSubnet2]]
     Export:
-      Name: Bitcoin-PrivateSubnets
+      Name: Garlicoin-PrivateSubnets
 
   PrivateSubnet1:
     Description: A reference to the private subnet in the 1st Availability Zone
     Value: !Ref PrivateSubnet1
     Export:
-      Name: Bitcoin-PrivateSubnet1
+      Name: Garlicoin-PrivateSubnet1
 
   PrivateSubnet2:
     Description: A reference to the private subnet in the 2nd Availability Zone
     Value: !Ref PrivateSubnet2
     Export:
-      Name: Bitcoin-PrivateSubnet2
+      Name: Garlicoin-PrivateSubnet2
 
   PublicSubnets:
     Description: A list of the public subnets
     Value: !Join [",", [!Ref PublicSubnet1, !Ref PublicSubnet2]]
     Export:
-      Name: Bitcoin-PublicSubnets
+      Name: Garlicoin-PublicSubnets
 
   PublicSubnet1:
     Description: A reference to the public subnet in the 1st Availability Zone
     Value: !Ref PublicSubnet1
     Export:
-      Name: Bitcoin-PublicSubnet1
+      Name: Garlicoin-PublicSubnet1
 
   PublicSubnet2:
     Description: A reference to the public subnet in the 2nd Availability Zone
     Value: !Ref PublicSubnet2
     Export:
-      Name: Bitcoin-PublicSubnet2
+      Name: Garlicoin-PublicSubnet2
       
   NLBListener:
     Description: NLBListener
     Value: !Ref NetworkLoadBalancerListenerElectrum
     Export:
-      Name: Bitcoin-NLBListener
+      Name: Garlicoin-NLBListener
 
   NLBTargetGroup:
     Description: TargetGroup
     Value: !Ref TargetGroupElectrum
     Export:
-      Name: Bitcoin-TargetGroup
+      Name: Garlicoin-TargetGroup
       
   ECSHostSecurityGroup:
     Description: ECSHostSecurityGroup
     Value: !Ref ECSHostSecurityGroup
     Export:
-      Name: Bitcoin-ECSHostSecurityGroup
+      Name: Garlicoin-ECSHostSecurityGroup
 
   ECSTaskExecutionRole:
     Description: ECSTaskExecutionRole
     Value: !Ref ECSTaskExecutionRole
     Export:
-      Name: Bitcoin-ECSTaskExecutionRole
+      Name: Garlicoin-ECSTaskExecutionRole
 
-  BitcoinExecutionRole:
-    Description: BitcoinExecutionRole ARN
-    Value: !GetAtt 'BitcoinExecutionRole.Arn'
+  GarlicoinExecutionRole:
+    Description: GarlicoinExecutionRole ARN
+    Value: !GetAtt 'GarlicoinExecutionRole.Arn'
     Export:
-      Name: Bitcoin-BitcoinExecutionRole-ARN
+      Name: Garlicoin-GarlicoinExecutionRole-ARN
 
   Cluster:
     Description: A reference to the ECS cluster
     Value: !Ref ECSCluster
     Export:
-      Name: Bitcoin-ECSCluster
+      Name: Garlicoin-ECSCluster
 
   EFS:
     Description: A reference to EFS
     Value: !Ref FileSystem
     Export:
-      Name: Bitcoin-EFS
+      Name: Garlicoin-EFS

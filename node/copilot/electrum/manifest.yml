@@ -21,8 +21,8 @@ storage:
       path: /root/electrum_data
       read_only: false
 
-cpu: 2048       # Number of CPU units for the task.
-memory: 16384    # Amount of memory in MiB used by the task.
+cpu: 1024       # Number of CPU units for the task.
+memory: 2048    # Amount of memory in MiB used by the task.
 count: 1       # Number of tasks that should be running in your service.
 exec: true     # Enable running commands in your container.
 
@@ -35,6 +35,6 @@ secrets:
   SERVER_KEY:
     secretsmanager: '${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/electrum:server_key::'
   RPC_USER:
-    secretsmanager: '${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/bitcoin-core:rpc_user::'
+    secretsmanager: '${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/garlicoin-core:rpc_user::'
   RPC_PASSWORD:
-    secretsmanager: '${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/bitcoin-core:rpc_password::'
+    secretsmanager: '${COPILOT_APPLICATION_NAME}/${COPILOT_ENVIRONMENT_NAME}/garlicoin-core:rpc_password::'

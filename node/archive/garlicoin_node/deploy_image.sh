@@ -2,7 +2,7 @@
 
 # This script shows how to build the Docker image and push it to ECR
 
-image=bitcoin_ecr
+image=garlicoin_ecr
 
 # Get the account number associated with the current IAM credentials
 account=$(aws sts get-caller-identity --query Account --output text)
