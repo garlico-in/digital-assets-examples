@@ -1,8 +1,8 @@
 #!/bin/sh
 
-mkdir /root/bitcoin_data/bitcoind
+mkdir /root/garlicoin_data/garlicoind
 
-rm /root/bitcoin_data/debug.log
+rm /root/garlicoin_data/debug.log
 
 ## Pre execution handler
 pre_execution_handler() {
@@ -45,23 +45,23 @@ pre_execution_handler
 pids=""
 RESULT=0
 
-echo "start bitcoind"
+echo "start garlicoind"
 
-REINDEX_FLAG=`aws ssm get-parameter --name "/copilot/applications/$COPILOT_APPLICATION_NAME/$COPILOT_ENVIRONMENT_NAME/bitcoin-node/reindex" | jq -r '.Parameter | .Value'`
+REINDEX_FLAG=`aws ssm get-parameter --name "/copilot/applications/$COPILOT_APPLICATION_NAME/$COPILOT_ENVIRONMENT_NAME/garlicoin-node/reindex" | jq -r '.Parameter | .Value'`
 echo "REINDEX_FLAG:$REINDEX_FLAG"
 
 reindex=""
 if [ "${REINDEX_FLAG}" != "None" ]; then
   echo "reindex"
-  aws ssm put-parameter --name "/copilot/applications/$COPILOT_APPLICATION_NAME/$COPILOT_ENVIRONMENT_NAME/bitcoin-node/reindex" --type "String" --value "None" --overwrite
-  rm -rf /root/bitcoin_data/bitcoind/blocks/
-  rm -rf /root/bitcoin_data/bitcoind/chainstate/
-  rm -rf /root/bitcoin_data/bitcoind/index/
+  aws ssm put-parameter --name "/copilot/applications/$COPILOT_APPLICATION_NAME/$COPILOT_ENVIRONMENT_NAME/garlicoin-node/reindex" --type "String" --value "None" --overwrite
+  rm -rf /root/garlicoin_data/garlicoind/blocks/
+  rm -rf /root/garlicoin_data/garlicoind/chainstate/
+  rm -rf /root/garlicoin_data/garlicoind/index/
   reindex="-reindex"
 fi
 echo reindex=$reindex
 
-/root/bitcoin/bin/bitcoind $reindex -conf=/root/bitcoin.conf -datadir=/root/bitcoin_data/bitcoind -rpcauth=$RPC_AUTH &
+/root/garlicoin/bin/garlicoind $reindex -conf=/root/garlicoin.conf -datadir=/root/garlicoin_data/garlicoind -rpcauth=$RPC_AUTH &
 pids="$pids $!"
 
 ## Wait until one app dies
