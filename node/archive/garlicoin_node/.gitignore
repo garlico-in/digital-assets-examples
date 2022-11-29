@@ -1,4 +1,0 @@
-.aws-sam/*
-server.*
-samconfig.toml
-id_rsa.pub
