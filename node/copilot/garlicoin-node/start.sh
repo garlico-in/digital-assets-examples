@@ -2,6 +2,7 @@
 
 mkdir -p /root/garlicoin_data/garlicoind
 
+
 # Start the Garlicoin process
 /root/garlicoin/bin/garlicoind -conf=/root/garlicoin.conf -datadir=/root/garlicoin_data/garlicoind
 sleep 1

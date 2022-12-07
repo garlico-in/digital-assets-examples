@@ -1,81 +1,30 @@
 #!/bin/sh
 
-export COIN=Garlicoin
-export DB_DIRECTORY=/root/electrum_data/electrumx
-export DAEMON_URL=http://$RPC_USER:$RPC_PASSWORD@garlicoin-core.$COPILOT_ENVIRONMENT_NAME.garlicoin.local:42068/
-echo "DAEMON_URL=$DAEMON_URL"
-export ALLOW_ROOT=true
-export SERVICES=ssl://:50002,rpc://
-export SSL_CERTFILE=/root/server.crt
-export SSL_KEYFILE=/root/server.key
-export PEER_DISCOVERY=off
-
-echo "$SERVER_CRT" > /root/server.crt
-echo "$SERVER_KEY" > /root/server.key
-
 mkdir /log
 ## Redirecting Filehanders
 ln -sf /proc/$$/fd/1 /log/stdout.log
 ln -sf /proc/$$/fd/2 /log/stderr.log
 
-mkdir /root/electrum_data/electrumx
+mkdir -p /root/electrum_data/electrumx
 
-## Pre execution handler
-pre_execution_handler() {
-  ## Pre Execution
-  echo "pre_execution"
-}
+export COIN='Garlicoin'
+export DB_DIRECTORY='/root/electrum_data/electrumx'
+export CACHE_MB='512'
+export MAX_SESSIONS='100'
 
-## Post execution handler
-post_execution_handler() {
-  ## Post Execution
-  echo "post_execution"
-  echo "wait 5s"
-  sleep 5
-  echo "finished"
-}
+echo "DAEMON_URL=$DAEMON_URL"
+export ALLOW_ROOT='true'
 
-## Sigterm Handler
-sigterm_handler() { 
-  if [ $pids -ne 0 ]; then
-    # the above if statement is important because it ensures 
-    # that the application has already started. without it you
-    # could attempt cleanup steps if the application failed to
-    # start, causing errors.
-    kill -15 "$pids"
-    wait "$pids"
-    post_execution_handler
-  fi
-  exit 143; # 128 + 15 -- SIGTERM
-}
+export REPORT_SSL_PORT='50002'
 
-## Setup signal trap
-# on callback execute the specified handler
-trap 'sigterm_handler' TERM
+export SERVICES=tcp://0.0.0.0:50001,ssl://0.0.0.0:50002,wss://0.0.0.0:50004,rpc://0.0.0.0:8000
+export HOST=''
 
-## Initialization
-pre_execution_handler
+export PEER_DISCOVERY='on'
+export PEER_ANNOUNCE='on'
 
-## Start Process
-# run process in background and record PID
-pids=""
-RESULT=0
+echo "$SERVER_CRT" > /root/server.crt
+echo "$SERVER_KEY" > /root/server.key
 
-echo "start electrumx"
-/root/electrumx/electrumx_server &
-pids="$pids $!"
-
-## Wait until one app dies
-for pid in $pids; do
-    wait $pid || let "RESULT=1"
-done
-if [ "$RESULT" == "1" ];
-    then
-       exit 1
-fi
-return_code="$?"
-
-## Cleanup
-post_execution_handler
-# echo the return code of the application
-exit $return_code
+# Start the electrum process
+/usr/local/bin/electrumx_server
