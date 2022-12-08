@@ -1,24 +1,17 @@
-FROM public.ecr.aws/lts/ubuntu:20.04_stable
-
-ENV DEBIAN_FRONTEND=noninteractive 
-
-RUN apt-get -y update && apt-get install -y --no-install-recommends \
-         awscli \
-         wget \
-         ca-certificates \
-         git \
-         jq \
-         python3 python3-dev python3-pip \
-    && rm -rf /var/lib/apt/lists/*
-
-USER root
+FROM public.ecr.aws/docker/library/alpine:3.17
 WORKDIR /root
 
-# bitcoind
-RUN wget https://github.com/GarlicoinOrg/Garlicoin/releases/download/v0.18.0/garlicoin-0.18.0-x86_64-linux-gnu.tar.gz && \ 
-    tar -xzf garlicoin-0.18.0-x86_64-linux-gnu.tar.gz && \
-    ln -s garlicoin-0.18.0 garlicoin && \
-    rm garlicoin-0.18.0-x86_64-linux-gnu.tar.gz
+RUN apk --update --repository=http://dl-4.alpinelinux.org/alpine/edge/testing add && \
+    apk update && \
+    apk upgrade --no-cache && \                                                                                                                                                                                                                        
+    apk add --no-cache bash ca-certificates wget boost libevent zeromq && \                                                                                                                                                                                                      
+    update-ca-certificates
+
+# garlicoind
+RUN wget https://downloads.garlico.in/garlicoin-alpine-aarch64.tar.gz && \
+    tar -xzf garlicoin-alpine-aarch64.tar.gz && \
+    ln -s garlicoin-alpine-aarch64 garlicoin && \
+    rm garlicoin-alpine-aarch64.tar.gz
 COPY garlicoin.conf /root/
 
 COPY start.sh /root/

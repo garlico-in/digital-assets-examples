@@ -1,4 +1,4 @@
-FROM public.ecr.aws/docker/library/ubuntu:focal
+FROM public.ecr.aws/lts/ubuntu:20.04_stable
 WORKDIR /root/
 
 # Install & Update
