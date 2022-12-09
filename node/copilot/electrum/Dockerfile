@@ -1,4 +1,4 @@
-FROM public.ecr.aws/lts/ubuntu:20.04_stable
+FROM public.ecr.aws/docker/library/python:3.9.16-slim
 WORKDIR /root/
 
 # Install & Update
@@ -6,27 +6,26 @@ RUN apt-get update -y
 RUN apt-get upgrade -y 
 RUN apt-get install -y git \
  && DEBIAN_FRONTEND="noninteractive" apt-get -y install tzdata
-RUN apt-get install -y software-properties-common 
+RUN apt-get install -y software-properties-common
+RUN apt-get install -y build-essential 
 RUN apt-get install libleveldb-dev -y
-RUN add-apt-repository ppa:deadsnakes/ppa
-RUN apt install -y python3 python3-aiohttp python3-pip net-tools 
-RUN pip3 install pylru 
-RUN pip3 install plyvel 
-RUN pip3 install 'aiorpcx==0.5.6'
 
 # electrumx
 RUN git clone https://github.com/garlicoin-project/electrumx.git
 WORKDIR /root/electrumx
-RUN python3 setup.py install
+RUN pip install websockets
+RUN pip install .
 
 WORKDIR /root
 COPY start.sh /root/
 RUN chmod +x /root/start.sh
 
-EXPOSE 50001
+RUN apt-get remove -y build-essential
+RUN apt-get autoremove -y 
+
+# ports
 EXPOSE 50002
 EXPOSE 50004
-EXPOSE 8000
 
 # start
-CMD /root/start.sh
+CMD ["bash", "-c", "ls -la && exec /root/start.sh"]

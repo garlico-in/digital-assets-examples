@@ -20,6 +20,8 @@ Resources:
   # 1. In addition to your resource, if you need to access the resource from your ECS task 
   # then you need to create an AWS::IAM::ManagedPolicy that holds the permissions for your resource.
   #
+
+  
  ElectrumSecrectsResourcePolicy:
     Type: AWS::IAM::ManagedPolicy
     Properties:

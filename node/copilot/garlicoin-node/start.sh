@@ -1,12 +1,9 @@
 #!/bin/bash
 
 mkdir -p /root/garlicoin_data/garlicoind
-ls -anh /root/garlicoin
-ls -anh /root/garlicoin/bin
-
 
 # Start the Garlicoin process
-/root/garlicoin/garlicoind -conf=/root/garlicoin.conf -datadir=/root/garlicoin_data/garlicoind
+/usr/local/bin/garlicoind -conf=/root/garlicoin.conf -datadir=/root/garlicoin_data/garlicoind
 sleep 1
 
 # Watch Process
