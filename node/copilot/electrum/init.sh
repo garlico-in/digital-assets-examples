@@ -14,4 +14,4 @@ SERVER_KEY=`cat /tmp/server.key | jq -sR . | sed -e 's/^"//' -e 's/"$//'`
 echo "SERVER_CRT=$SERVER_CRT"
 echo "SERVER_KEY=$SERVER_KEY"
 
-aws secretsmanager create-secret --name "garlicoin/$ENV/electrum" --secret-string "{\"server_crt\":\"$SERVER_CRT\",\"server_key\":\"$SERVER_KEY\"}" --tags "[{\"Key\":\"copilot-application\",\"Value\":\"garlicoin\"},{\"Key\":\"copilot-environment\",\"Value\":\"$ENV\"}]"
+aws secretsmanager create-secret --name "$COPILOT_APPLICATION_NAME/$COPILOT_ENVIRONMENT_NAME/electrum" --secret-string "{\"server_crt\":\"$SERVER_CRT\",\"server_key\":\"$SERVER_KEY\"}" --tags "[{\"Key\":\"copilot-application\",\"Value\":\"garlicoin\"},{\"Key\":\"copilot-environment\",\"Value\":\"$ENV\"}]"

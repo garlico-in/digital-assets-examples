@@ -1,32 +1,73 @@
-FROM public.ecr.aws/lts/ubuntu:20.04_stable
+FROM public.ecr.aws/docker/library/alpine:3.17 as build
+LABEL maintainer = "jorge@garlicoin.io"
 
-ENV DEBIAN_FRONTEND=noninteractive 
+WORKDIR /tmp
 
-RUN apt-get -y update && apt-get install -y --no-install-recommends \
-         awscli \
-         wget \
-         ca-certificates \
-         git \
-         jq \
-         python3 python3-dev python3-pip \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk update
+RUN apk upgrade --no-cache
+RUN apk add --no-cache ca-certificates
+RUN update-ca-certificates
+RUN apk add --no-cache --update alpine-sdk
+RUN apk add --no-cache autoconf
+RUN apk add --no-cache automake
+RUN apk add --no-cache bash
+RUN apk add --no-cache bison
+RUN apk add --no-cache boost-dev
+RUN apk add --no-cache build-base
+RUN apk add --no-cache cmake
+RUN apk add --no-cache curl
+RUN apk add --no-cache git
+RUN apk add --no-cache libevent-dev
+RUN apk add --no-cache libressl
+RUN apk add --no-cache libtool
+RUN apk add --no-cache linux-headers
+RUN apk add --no-cache make
+RUN apk add --no-cache pkgconf
+RUN apk add --no-cache python3
+RUN apk add --no-cache sqlite
+RUN apk add --no-cache xz
+RUN apk add --no-cache zeromq-dev
+RUN apk add --no-cache openssl-dev
 
-USER root
-WORKDIR /root
+RUN git clone https://github.com/GarlicoinOrg/Garlicoin.git garlicoin
 
-# bitcoind
-RUN wget https://github.com/GarlicoinOrg/Garlicoin/releases/download/v0.18.0/garlicoin-0.18.0-x86_64-linux-gnu.tar.gz && \ 
-    tar -xzf garlicoin-0.18.0-x86_64-linux-gnu.tar.gz && \
-    ln -s garlicoin-0.18.0 garlicoin && \
-    rm garlicoin-0.18.0-x86_64-linux-gnu.tar.gz
+WORKDIR /tmp/garlicoin
+RUN wget https://raw.githubusercontent.com/bitcoin/bitcoin/master/contrib/install_db4.sh
+RUN sh install_db4.sh `pwd`
+
+ENV BDB_PREFIX='/tmp/garlicoin/db4'
+RUN ./autogen.sh
+RUN ./configure \
+    LDFLAGS="-L${BDB_PREFIX}/lib/" \
+    CPPFLAGS="-I${BDB_PREFIX}/include/" \
+    --disable-tests \
+    --disable-bench 
+
+RUN make
+RUN make install
+RUN strip /usr/local/bin/garlicoin*
+
+FROM public.ecr.aws/docker/library/alpine:3.17
+
+RUN apk add --no-cache \
+  boost \
+  boost-program_options \
+  libevent \
+  libzmq \
+  openssl \
+  bash
+
+COPY --from=build \
+  /usr/local/bin/garlicoind \
+  /usr/local/bin/
+
 COPY garlicoin.conf /root/
 
 COPY start.sh /root/
 RUN chmod +x /root/start.sh
- 
+
 EXPOSE 29000
 EXPOSE 42068
 EXPOSE 42069
 
-# start
 CMD ["bash", "-c", "ls -la && exec /root/start.sh"]

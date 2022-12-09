@@ -38,6 +38,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Join ["-", ["digitalassets", !Ref EnvironmentName]]
+        - Key: garlicoin-stack
+          Value: 'garlicoin-serverless'
 
   InternetGateway:
     Type: AWS::EC2::InternetGateway
@@ -45,6 +47,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Ref EnvironmentName
+        - Key: garlicoin-stack
+          Value: 'garlicoin-serverless'
 
   InternetGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
@@ -62,6 +66,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName} Public Subnet (AZ1)
+        - Key: garlicoin-stack
+          Value: 'garlicoin-serverless'          
 
   PublicSubnet2:
     Type: AWS::EC2::Subnet
@@ -73,6 +79,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName} Public Subnet (AZ2)
+        - Key: garlicoin-stack
+          Value: 'garlicoin-serverless'          
 
   PrivateSubnet1:
     Type: AWS::EC2::Subnet
@@ -84,6 +92,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName} Private Subnet (AZ1)
+        - Key: garlicoin-stack
+          Value: 'garlicoin-serverless'          
 
   PrivateSubnet2:
     Type: AWS::EC2::Subnet
@@ -95,6 +105,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName} Private Subnet (AZ2)
+        - Key: garlicoin-stack
+          Value: 'garlicoin-serverless'          
 
   NatGateway1EIP:
     Type: AWS::EC2::EIP
@@ -155,6 +167,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName} Private Routes (AZ1)
+        - Key: garlicoin-stack
+          Value: 'garlicoin-serverless'          
 
   DefaultPrivateRoute1:
     Type: AWS::EC2::Route
@@ -176,6 +190,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName} Private Routes (AZ2)
+        - Key: garlicoin-stack
+          Value: 'garlicoin-serverless'          
 
   DefaultPrivateRoute2:
     Type: AWS::EC2::Route
